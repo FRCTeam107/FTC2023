@@ -33,6 +33,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 
 /**
  * This file works in conjunction with the External Hardware Class sample called: ConceptExternalHardwareClass.java
@@ -69,6 +70,7 @@ public class RobotHardware {
     Servo airplaneServo = null;
     Servo hookServo = null;
     Servo flipperServo = null;
+    TouchSensor touchSensor;
 //    Servo claw1 = null;
     // Define Drive constants.  Make them public so they CAN be used by the calling OpMode
 
@@ -99,6 +101,7 @@ public class RobotHardware {
         airplaneServo = hardwareMap.get(Servo.class, "airplane_servo");
         flipperServo = hardwareMap.get(Servo.class, "flipper_servo");
         hookServo = hardwareMap.get(Servo.class,"hook_servo");
+        touchSensor = hardwareMap.get(TouchSensor.class, "sensor_touch");
 
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.

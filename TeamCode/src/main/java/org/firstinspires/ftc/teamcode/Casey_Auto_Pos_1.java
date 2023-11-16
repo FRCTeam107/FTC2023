@@ -35,11 +35,19 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 /**
  * This file illustrates the concept of driving a path based on encoder counts.
@@ -67,10 +75,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Moist Towelette I", group="Robot")
+@Autonomous(name="Dry Towelette 1", group="Robot")
 
 public class Casey_Auto_Pos_1 extends LinearOpMode {
-
     /* Declare OpMode members. */
 //    private DcMotor leftFrontDrive = null;
 //    private DcMotor rightFrontDrive = null;
@@ -97,6 +104,11 @@ public class Casey_Auto_Pos_1 extends LinearOpMode {
             (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double DRIVE_SPEED = 0.8;
     static final double TURN_SPEED = 0.7;
+
+    BNO055IMU imu;
+    Orientation angles;
+    Acceleration gravity;
+
 
 
     @Override
@@ -136,19 +148,37 @@ public class Casey_Auto_Pos_1 extends LinearOpMode {
                 robot.rightBackDrive.getCurrentPosition());
         telemetry.update();
 
+
+        initGyro();
+
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         sleep(1000);
-        encoderDrive(DRIVE_SPEED, 20, 20, 3); //
-        robot.flipperMotor.setPower(10);
+        encoderDrive(DRIVE_SPEED, 24, 24, 3); //
+        robot.flipperMotor.setPower(-1);
+        runtime.reset();
+        while (opModeIsActive() && runtime.seconds()< 0.45){}
+        robot.flipperMotor.setPower(0);
         robot.flipperServo.setPosition(0);
-        while (opModeIsActive() && runtime.seconds()< 0.5){}
+        runtime.reset();
+        while (opModeIsActive() && runtime.seconds()< 5){}
         robot.flipperServo.setPosition(0.5);
-        robot.flipperMotor.setPower(-10);
-        encoderDrive(DRIVE_SPEED, -20, -20, 3); //
+        robot.flipperMotor.setPower(1);
+        runtime.reset();
+        while (opModeIsActive() && runtime.seconds()< 0.3){}
+        robot.flipperMotor.setPower(0);
+        //TODO:gyro
+//        turnWithGyro(86,.5);
+        encoderDrive(DRIVE_SPEED, 23.3, -23.3, 3); //
+        // encoderDrive(DRIVE_SPEED, 19, 19, 3); //
+        runtime.reset();
+        robot.towerMotor.setPower(.25);
+        while (opModeIsActive() && runtime.seconds()< 0.5){}
+        robot.towerMotor.setPower(0);
+        robot.flipperMotor.setPower(0);
 
 
         while (opModeIsActive()) {
@@ -240,4 +270,75 @@ public class Casey_Auto_Pos_1 extends LinearOpMode {
             sleep(250); // optional pause after each move.
         }
     }
-}
+
+    public void turnWithGyro(double degrees, double speedDirection){
+
+        angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        double yaw = -angles.firstAngle;//make this negative
+        telemetry.addData("Speed Direction", speedDirection);
+        telemetry.addData("Yaw", yaw);
+        telemetry.update();
+
+        telemetry.addData("stuff", speedDirection);
+        telemetry.update();
+        double first;
+        double second;
+
+
+        if (speedDirection > 0){//set target positions
+            //turn right
+            if (degrees > 10){
+                first = (degrees - 10) + deconvert(yaw);
+                second = degrees + deconvert(yaw);
+            }else{
+                first = deconvert(yaw);
+                second = degrees + deconvert(yaw);
+            }
+
+        }else{
+            //turn left
+            if (degrees > 10){
+                first = deconvert(-(degrees - 10) + deconvert(yaw));
+                second = deconvert(-degrees + deconvert(yaw));
+            }else{
+                first = deconvert(yaw);
+                second = deconvert(-degrees + deconvert(yaw));
+            }
+        }
+    }
+
+    public double deconvert(double degrees){
+        if (degrees < 0){
+            degrees = degrees + 360;
+        }
+        return degrees;
+    }
+    public double convert(double degrees){
+        if (degrees > 179){
+            degrees = -(360 - degrees);
+        } else if(degrees < -180){
+            degrees = 360 + degrees;
+        } else if(degrees > 360){
+            degrees = degrees - 360;
+        }
+        return degrees;
+    }
+
+    /*
+    This function is called at the beginning of the program to activate
+    the IMU Integrated Gyro.
+     */
+        public void initGyro(){
+            BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+            parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+            parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+            //parameters.calibrationDataFile = "GyroCal.json"; // see the calibration sample opmode
+            parameters.loggingEnabled      = true;
+            parameters.loggingTag          = "IMU";
+            parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+            //
+            imu = hardwareMap.get(BNO055IMU.class, "imu");
+            imu.initialize(parameters);
+        }
+
+    }

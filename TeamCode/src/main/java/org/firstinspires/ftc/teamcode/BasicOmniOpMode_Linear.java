@@ -136,8 +136,11 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
             boolean pixel_out = gamepad2.y;
             boolean flipper_up = gamepad2.left_bumper;
             boolean flipper_down = gamepad2.right_bumper;
-            boolean hook_up = gamepad2.y;
-            boolean airplane = gamepad2.x;
+            boolean hook_up = gamepad1.x;
+            boolean hook_servo = gamepad1.b;
+            boolean airplane = gamepad1.a;
+            boolean resetEncoderLeft = gamepad2.left_stick_button;
+            boolean resetEncoderRight = gamepad2.right_stick_button;
             boolean flipper_something = gamepad2.b;
 
 
@@ -167,8 +170,11 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
             } else {
                 robot.airplaneServo.setPosition(.5);
 
-
-
+                if(hook_servo) {
+                    robot.hookServo.setPosition(0);
+                } else {
+                    robot.hookServo.setPosition(.5);
+                }
 
                 //pixel operation
                 if(pixel_in) {
@@ -195,7 +201,7 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
                 if (tower_up) {
                     robot.towerMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     robot.towerMotor.setPower(1);
-                }else if(tower_down){
+                }else if(tower_down && !robot.touchSensor.isPressed()){
                     robot.towerMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     robot.towerMotor.setPower(-.5);
                 }else {
@@ -205,24 +211,29 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
                 }
 
 
+                if(resetEncoderLeft && resetEncoderRight){
+                    robot.flipperMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    telemetry.addData("current:", "%7d", robot.flipperMotor.getCurrentPosition());
+                    telemetry.update();
+                }else {}
                 if (flipper_up) {
+                    robot.flipperMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     robot.flipperMotor.setPower(.5);
-                } else if (flipper_down){
-                    robot.flipperMotor.setPower(-.5);
-                } else robot.flipperMotor.setPower(0);
-
-
-                //TODO: Find encoder values for these locations (Start up and then drop and set to zero?)
-                if (flipper_something) {
+                } else if (flipper_down) {
+                    robot.flipperMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    robot.flipperMotor.setPower(-0.25);
+//                } else robot.flipperMotor.setPower(0);
+                }else if (flipper_something) {
                     int newTargetPosition = (robot.flipperMotor.getCurrentPosition());
-                    robot.flipperMotor.setTargetPosition(25);
+                    robot.flipperMotor.setTargetPosition(60);
                     robot.flipperMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     robot.flipperMotor.setPower(1);
-//                while (opModeIsActive() && robot.flipperMotor.isBusy()) {
-//                }
+                while (opModeIsActive() && robot.flipperMotor.isBusy()) {
+                }
                     telemetry.addData("current:", "%7d", robot.flipperMotor.getCurrentPosition());
-                    telemetry.update();}
-//            } else if (flipper_travel) {
+                    telemetry.update();
+            } else robot.flipperMotor.setPower(0);
+                //            } else if (flipper_travel) {
 //                int newTargetPosition = (robot.flipperMotor.getCurrentPosition());
 //                robot.flipperMotor.setTargetPosition(5500);
 //                robot.flipperMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
