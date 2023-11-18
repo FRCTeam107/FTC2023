@@ -164,7 +164,7 @@ public class Casey_Auto_Pos_1 extends LinearOpMode {
         robot.flipperMotor.setPower(0);
         robot.flipperServo.setPosition(0);
         runtime.reset();
-        while (opModeIsActive() && runtime.seconds()< 5){}
+        while (opModeIsActive() && runtime.seconds()< 1.5){}
         robot.flipperServo.setPosition(0.5);
         robot.flipperMotor.setPower(1);
         runtime.reset();
@@ -172,14 +172,20 @@ public class Casey_Auto_Pos_1 extends LinearOpMode {
         robot.flipperMotor.setPower(0);
         //TODO:gyro
 //        turnWithGyro(86,.5);
-        encoderDrive(DRIVE_SPEED, 23.3, -23.3, 3); //
+        encoderDrive(DRIVE_SPEED, 21, -21, 3); //
         // encoderDrive(DRIVE_SPEED, 19, 19, 3); //
         runtime.reset();
-        robot.towerMotor.setPower(.25);
-        while (opModeIsActive() && runtime.seconds()< 0.5){}
+        robot.towerMotor.setPower(0.5);
+        while (opModeIsActive() && runtime.seconds()< 2){}
+        encoderDrive(DRIVE_SPEED, 17, 17, 3); //
         robot.towerMotor.setPower(0);
         robot.flipperMotor.setPower(0);
-
+        robot.flipperServo.setPosition(0);
+        runtime.reset();
+        while (opModeIsActive() && runtime.seconds()< 5){}
+        runtime.reset();
+//        robot.flipperMotor.setPower(0);
+        robot.flipperServo.setPosition(0.5);
 
         while (opModeIsActive()) {
             telemetry.addData("Currently at", " at LF%7d :RF%7d :LB%7d :RB%7d ",

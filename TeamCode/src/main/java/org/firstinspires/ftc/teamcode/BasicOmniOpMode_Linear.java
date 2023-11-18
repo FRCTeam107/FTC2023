@@ -79,7 +79,18 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
 //    private Servo claw1 = null;
 
 
-    @Override
+//    @Override
+    private double speedControl(double inputSpeed)
+    {
+        double temp = Math.abs(inputSpeed);
+        double outputSpeed = ((temp*temp) - 0.025*temp);
+
+        if(outputSpeed > -0.03 && outputSpeed < 0.03){
+            outputSpeed = 0;
+        }
+
+        return inputSpeed < 0 ? outputSpeed * -1 : outputSpeed;
+    }
     public void runOpMode() {
 
         RobotHardware robot = new RobotHardware();
@@ -127,9 +138,12 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
             //TODO: move climber to gamepad 1
 
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
-            double axial   = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
-            double lateral =  gamepad1.left_stick_x;
-            double yaw     =  gamepad1.right_stick_x;
+            double axial   =  speedControl(-gamepad1.left_stick_y);  // Note: pushing stick forward gives negative value
+            double lateral =  speedControl(gamepad1.left_stick_x);
+            double yaw     =  speedControl(gamepad1.right_stick_x);
+            //double axial   = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
+            //double lateral =  gamepad1.left_stick_x;
+            //double yaw     =  gamepad1.right_stick_x;
             boolean tower_up = gamepad2.dpad_up;
             boolean tower_down = gamepad2.dpad_down;
             boolean pixel_in = gamepad2.a;
@@ -137,6 +151,8 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
             boolean flipper_up = gamepad2.left_bumper;
             boolean flipper_down = gamepad2.right_bumper;
             boolean hook_up = gamepad1.x;
+            boolean hook_release1 = gamepad1.dpad_left;
+            boolean hook_release2 = gamepad2.dpad_left;
             boolean hook_servo = gamepad1.b;
             boolean airplane = gamepad1.a;
             boolean resetEncoderLeft = gamepad2.left_stick_button;
@@ -170,14 +186,14 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
             } else {
                 robot.airplaneServo.setPosition(.5);
 
-                if(hook_servo) {
+                if (hook_servo) {
                     robot.hookServo.setPosition(0);
                 } else {
                     robot.hookServo.setPosition(.5);
                 }
 
                 //pixel operation
-                if(pixel_in) {
+                if (pixel_in) {
                     robot.flipperServo.setPosition(1);
 //                robot.claw1.setPosition(0);
                     sleep(10);
@@ -191,12 +207,13 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
                 }
 
 
-
                 //hooking winch
                 //TODO: add limit switch at bottom of tower
                 if (hook_up) {
-                    robot.hookMotor.setPower(.5);
-                } else robot.hookMotor.setPower(0);
+                    robot.hookMotor.setPower(1);
+                } else if (hook_release1 && hook_release2){
+                    robot.hookMotor.setPower(-1);
+                }   else robot.hookMotor.setPower(0);
 
                 if (tower_up) {
                     robot.towerMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
