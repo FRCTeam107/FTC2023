@@ -83,11 +83,7 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
     private double speedControl(double inputSpeed)
     {
         double temp = Math.abs(inputSpeed);
-        double outputSpeed = ((temp*temp) - 0.025*temp);
-
-        if(outputSpeed > -0.03 && outputSpeed < 0.03){
-            outputSpeed = 0;
-        }
+        double outputSpeed = (((temp*temp) - 0.15*temp)) / 1.25;
 
         return inputSpeed < 0 ? outputSpeed * -1 : outputSpeed;
     }
@@ -131,11 +127,12 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
         waitForStart();
         runtime.reset();
 
+        double towerDownPosition = 0;
+
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             double max;
 
-            //TODO: move climber to gamepad 1
 
             // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
             double axial   =  speedControl(-gamepad1.left_stick_y);  // Note: pushing stick forward gives negative value
@@ -158,6 +155,7 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
             boolean resetEncoderLeft = gamepad2.left_stick_button;
             boolean resetEncoderRight = gamepad2.right_stick_button;
             boolean flipper_something = gamepad2.b;
+            boolean tower_encoder_value = gamepad2.x;
 
 
             // Combine the joystick requests for each axis-motion to determine each wheel's power.
@@ -182,7 +180,7 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
 
             //airplane Launcher
             if(airplane) {
-                robot.airplaneServo.setPosition(1);
+                robot.airplaneServo.setPosition(0);
             } else {
                 robot.airplaneServo.setPosition(.5);
 
@@ -210,29 +208,56 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
                 //hooking winch
                 //TODO: add limit switch at bottom of tower
                 if (hook_up) {
-                    robot.hookMotor.setPower(1);
-                } else if (hook_release1 && hook_release2){
                     robot.hookMotor.setPower(-1);
+                } else if (hook_release1 && hook_release2){
+                    robot.hookMotor.setPower(1);
                 }   else robot.hookMotor.setPower(0);
 
-                if (tower_up) {
+
+                //if limit switch is active then reset encoder
+                
+
+                if(!robot.touchSensor.isPressed() && gamepad2.dpad_right)
+                {
+                    towerDownPosition = robot.towerMotor.getCurrentPosition();
+                    telemetry.addData("tower position:", "%7d", robot.towerMotor.getCurrentPosition());
+                    telemetry.update();
+
+                }else{}
+                //TODO determine what the number of encoder counts is to lift tower from bottom to top
+                //if (tower_up && (robot.towerMotor.getCurrentPosition() - towerDownPosition < 10000)
+                if (tower_up && robot.towerMotor.getCurrentPosition() < 8500) {
                     robot.towerMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     robot.towerMotor.setPower(1);
+//                    telemetry.addData("tower position:", "%7d", robot.towerMotor.getCurrentPosition());
+//                    telemetry.update();
+
                 }else if(tower_down && !robot.touchSensor.isPressed()){
                     robot.towerMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    robot.towerMotor.setPower(-.5);
+                    robot.towerMotor.setPower(-.75);
                 }else {
                     if(!robot.towerMotor.isBusy()){
                         robot.towerMotor.setPower(0);}
                     else{}
                 }
 
-
-                if(resetEncoderLeft && resetEncoderRight){
-                    robot.flipperMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    telemetry.addData("current:", "%7d", robot.flipperMotor.getCurrentPosition());
-                    telemetry.update();
+                if(robot.touchSensor.isPressed()) {
+                    robot.towerMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 }else {}
+
+                if(tower_encoder_value){
+//                    robot.towerMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    telemetry.addData("tower position:", "%7d", robot.towerMotor.getCurrentPosition());
+                    telemetry.update();
+                }
+
+
+
+//                if(resetEncoderLeft && resetEncoderRight){
+//                    robot.flipperMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//                    telemetry.addData("current:", "%7d", robot.flipperMotor.getCurrentPosition());
+//                    telemetry.update();
+//                }else {}
                 if (flipper_up) {
                     robot.flipperMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     robot.flipperMotor.setPower(.5);
@@ -240,15 +265,15 @@ public class BasicOmniOpMode_Linear extends LinearOpMode {
                     robot.flipperMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     robot.flipperMotor.setPower(-0.25);
 //                } else robot.flipperMotor.setPower(0);
-                }else if (flipper_something) {
-                    int newTargetPosition = (robot.flipperMotor.getCurrentPosition());
-                    robot.flipperMotor.setTargetPosition(60);
-                    robot.flipperMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    robot.flipperMotor.setPower(1);
-                while (opModeIsActive() && robot.flipperMotor.isBusy()) {
-                }
-                    telemetry.addData("current:", "%7d", robot.flipperMotor.getCurrentPosition());
-                    telemetry.update();
+//                }else if (flipper_something) {
+//                    int newTargetPosition = (robot.flipperMotor.getCurrentPosition());
+//                    robot.flipperMotor.setTargetPosition(60);
+//                    robot.flipperMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                    robot.flipperMotor.setPower(1);
+//                while (opModeIsActive() && robot.flipperMotor.isBusy()) {
+//                }
+//                    telemetry.addData("current:", "%7d", robot.flipperMotor.getCurrentPosition());
+//                    telemetry.update();
             } else robot.flipperMotor.setPower(0);
                 //            } else if (flipper_travel) {
 //                int newTargetPosition = (robot.flipperMotor.getCurrentPosition());

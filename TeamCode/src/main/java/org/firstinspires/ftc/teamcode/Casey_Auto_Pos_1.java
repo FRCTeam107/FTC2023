@@ -38,6 +38,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -76,7 +77,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
  */
 
 @Autonomous(name="Dry Towelette 1", group="Robot")
-
+@Disabled
 public class Casey_Auto_Pos_1 extends LinearOpMode {
     /* Declare OpMode members. */
 //    private DcMotor leftFrontDrive = null;
@@ -177,7 +178,7 @@ public class Casey_Auto_Pos_1 extends LinearOpMode {
         runtime.reset();
         robot.towerMotor.setPower(0.5);
         while (opModeIsActive() && runtime.seconds()< 2){}
-        encoderDrive(DRIVE_SPEED, 17, 17, 3); //
+        encoderDrive(DRIVE_SPEED, 44, 44, 3); //
         robot.towerMotor.setPower(0);
         robot.flipperMotor.setPower(0);
         robot.flipperServo.setPosition(0);

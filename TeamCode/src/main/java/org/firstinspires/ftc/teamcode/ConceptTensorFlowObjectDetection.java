@@ -27,11 +27,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.robotcontroller.external.samples;
+package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
@@ -47,7 +47,7 @@ import java.util.List;
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list.
  */
-@TeleOp(name = "Concept: TensorFlow Object Detection", group = "Concept")
+@TeleOp(name = "Concept: My Camera Stuff", group = "Concept")
 //@Disabled
 public class ConceptTensorFlowObjectDetection extends LinearOpMode {
 
@@ -55,13 +55,14 @@ public class ConceptTensorFlowObjectDetection extends LinearOpMode {
 
     // TFOD_MODEL_ASSET points to a model file stored in the project Asset location,
     // this is only used for Android Studio when using models in Assets.
-//    private static final String TFOD_MODEL_ASSET = "MyModelStoredAsAsset.tflite";
+    private static final String TFOD_MODEL_ASSET = "MyModelStoredAsAsset.tflite";
     // TFOD_MODEL_FILE points to a model file stored onboard the Robot Controller's storage,
     // this is used when uploading models directly to the RC using the model upload interface.
-    private static final String TFOD_MODEL_FILE = "/sdcard/FIRST/tflitemodels/model_20231121_190235";
+    private static final String TFOD_MODEL_FILE = "/sdcard/FIRST/tflitemodels/model_2023.tflite";
     // Define the labels recognized in the model for TFOD (must be in training order!)
     private static final String[] LABELS = {
-       "redShape",
+       "Blue Object",
+            "Red Object"
     };
 
     /**
@@ -123,7 +124,7 @@ public class ConceptTensorFlowObjectDetection extends LinearOpMode {
             // choose one of the following:
             //   Use setModelAssetName() if the custom TF Model is built in as an asset (AS only).
             //   Use setModelFileName() if you have downloaded a custom team model to the Robot Controller.
-            //.setModelAssetName(TFOD_MODEL_ASSET)
+//            .setModelAssetName(TFOD_MODEL_ASSET)
             .setModelFileName(TFOD_MODEL_FILE)
 
             // The following default settings are available to un-comment and edit as needed to 
@@ -191,7 +192,19 @@ public class ConceptTensorFlowObjectDetection extends LinearOpMode {
             telemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
             telemetry.addData("- Position", "%.0f / %.0f", x, y);
             telemetry.addData("- Size", "%.0f x %.0f", recognition.getWidth(), recognition.getHeight());
+            if(x < 300 && (recognition.getLabel() == "Red Object" ||recognition.getLabel() == "Blue Object" ) )
+            {
+                telemetry.addData("Position","Left");
+                telemetry.update();
+            }else  if(x > 300 && (recognition.getLabel() == "Red Object" ||recognition.getLabel() == "Blue Object" ) ){
+                telemetry.addData("Position","Middle");
+                telemetry.update();
+            }else {
+                telemetry.addData("Position","Right");
+                telemetry.update();
+            }
         }   // end for() loop
+
 
     }   // end method telemetryTfod()
 

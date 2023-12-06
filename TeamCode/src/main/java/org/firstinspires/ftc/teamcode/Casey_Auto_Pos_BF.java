@@ -36,6 +36,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -67,7 +68,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  */
 
 @Autonomous(name="Moist Towelette VI: Towelette Takes Manhattan", group="Robot")
-
+@Disabled
 public class Casey_Auto_Pos_BF extends LinearOpMode {
 
     RobotHardware robot = new RobotHardware();
